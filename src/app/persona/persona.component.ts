@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 interface Persona {
@@ -10,12 +11,16 @@ interface Persona {
 
 @Component({
   selector: 'app-persona',
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './persona.component.html',
   styleUrl: './persona.component.css'
 })
 export class PersonaComponent {
   personas: Persona[] = [];
+
+  dni = '';
+  nombre = '';
+  fechaNacimiento = '';
 
   constructor(private router: Router) {
     if (localStorage.getItem('sesionBasica') !== 'si') {
@@ -27,6 +32,43 @@ export class PersonaComponent {
     if (datos !== null) {
       this.personas = JSON.parse(datos);
     }
+  }
+
+  guardar() {
+    if (this.dni.trim() === '' || this.nombre.trim() === '' ||
+        this.fechaNacimiento === '') {
+      alert('Complete los tres campos');
+      return;
+    }
+
+    let nuevoId = 1;
+    for (const persona of this.personas) {
+      if (persona.id >= nuevoId) {
+        nuevoId = persona.id + 1;
+      }
+    }
+
+    const nuevaPersona: Persona = {
+      id: nuevoId,
+      dni: this.dni.trim(),
+      nombre: this.nombre.trim(),
+      fechaNacimiento: this.fechaNacimiento
+    };
+
+    this.personas.push(nuevaPersona);
+    this.guardarEnLocalStorage();
+    this.limpiar();
+  }
+
+  limpiar() {
+    this.dni = '';
+    this.nombre = '';
+    this.fechaNacimiento = '';
+  }
+
+  guardarEnLocalStorage() {
+    localStorage.setItem('personasBasico',
+      JSON.stringify(this.personas));
   }
 
   cerrarSesion() {
